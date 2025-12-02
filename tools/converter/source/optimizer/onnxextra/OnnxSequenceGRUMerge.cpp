@@ -111,9 +111,29 @@ public:
         }
 
         // auto sequence_lens = inputs[4]; sequence_lens is ommitted at onnxConverter.cpp
-        if (inputs.size() > 4 && inputs[4].get() != nullptr) {
-            MNN_ERROR("Don't support sequence_lens input, all batch have seq_length\n");
-            return nullptr;
+        // Fix: Check if sequence_lens is actually used (not just an empty placeholder)
+        // When ONNX GRU has 6 inputs with empty sequence_lens (input[4]=""),
+        // MNN may still create a placeholder VARP. We need to check multiple conditions:
+        // 1. seq_lens.get() != nullptr - the VARP exists
+        // 2. info != nullptr && info->size > 0 - it has valid shape info
+        // 3. !varName.empty() - it has a non-empty name (empty name indicates placeholder)
+        //
+        // This fix allows GRU models with empty sequence_lens (common in PyTorch exports)
+        // to be converted successfully.
+        if (inputs.size() > 4) {
+            auto seq_lens = inputs[4];
+            if (seq_lens.get() != nullptr) {
+                auto info = seq_lens->getInfo();
+                std::string varName = seq_lens->name();
+
+                // Only reject if sequence_lens is a real tensor with valid info and name
+                bool isRealSequenceLens = (info != nullptr && info->size > 0 && !varName.empty());
+
+                if (isRealSequenceLens) {
+                    MNN_ERROR("Don't support sequence_lens input, all batch have seq_length\n");
+                    return nullptr;
+                }
+            }
         }
         if (inputs.size() > 5) { // initial_h exist, shape is [num_directions, batch_size, hidden_size]
             gruInput.push_back(inputs[5]);
