@@ -34,6 +34,7 @@
   extern void ___MetalPReLUCreator__OpType_PReLU__();
   extern void ___MetalReLU6Creator__OpType_ReLU6__();
   extern void ___MetalReLU6Creator__OpType_ReLU__();
+  extern void ___MetalRNNSequenceGRUCreator__OpType_RNNSequenceGRU__();
 void registerMetalOps() {
    ___MetalArgMaxCreator__OpType_ArgMax__();
    ___MetalArgMaxCreator__OpType_ArgMin__();
@@ -64,6 +65,7 @@ void registerMetalOps() {
    ___MetalPReLUCreator__OpType_PReLU__();
    ___MetalReLU6Creator__OpType_ReLU6__();
    ___MetalReLU6Creator__OpType_ReLU__();
+   ___MetalRNNSequenceGRUCreator__OpType_RNNSequenceGRU__();
 #ifdef MNN_SUPPORT_TRANSFORMER_FUSE
    ___AttentionBufCreator__OpType_Attention__();
 #endif
